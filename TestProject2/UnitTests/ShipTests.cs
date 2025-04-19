@@ -116,4 +116,22 @@ public class ShipTests
         ship.Wait();
         Assert.Equal(ShipState.Waiting, ship.State);
     }
+    
+    // Ожидание → Погрузка → Ожидание → Движение → Ожидание
+    [Fact]
+    public void LoadCargoAndNavigate_ShouldFollowSequence()
+    {
+        ship.Start();
+        Assert.Equal(ShipState.Waiting, ship.State);
+
+        cargoSystemMock.Setup(c => c.CurrentWeight).Returns(100.0);
+        ship.LoadCargo(100.0);
+        Assert.Equal(ShipState.Waiting, ship.State);
+
+        ship.NavigateTo("Port B");
+        Assert.Equal(ShipState.Moving, ship.State);
+
+        ship.Wait();
+        Assert.Equal(ShipState.Waiting, ship.State);
+    }
 }

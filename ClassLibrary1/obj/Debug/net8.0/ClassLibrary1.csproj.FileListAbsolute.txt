@@ -9,3 +9,4 @@ C:\Users\FlackBiss\RiderProjects\ClassLibrary1\ClassLibrary1\obj\Debug\net8.0\Cl
 C:\Users\FlackBiss\RiderProjects\ClassLibrary1\ClassLibrary1\obj\Debug\net8.0\refint\ClassLibrary1.dll
 C:\Users\FlackBiss\RiderProjects\ClassLibrary1\ClassLibrary1\obj\Debug\net8.0\ClassLibrary1.pdb
 C:\Users\FlackBiss\RiderProjects\ClassLibrary1\ClassLibrary1\obj\Debug\net8.0\ref\ClassLibrary1.dll
+C:\Users\FlackBiss\RiderProjects\ClassLibrary1\ClassLibrary1\obj\Debug\net8.0\ClassLibrary1.sourcelink.json
