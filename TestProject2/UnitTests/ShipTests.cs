@@ -104,8 +104,26 @@ public class ShipTests
         ship.LoadCargo(100.0);
         Assert.Equal(ShipState.Waiting, ship.State);
     }
+    
+    // Ожидание → Разгрузка → Ожидание
+    [Fact]
+    public void Scenario_Waiting_Unloading_Waiting()
+    {
+        // Arrange: Запускаем корабль, чтобы перейти в состояние Ожидание
+        ship.Start();
+        Assert.Equal(ShipState.Waiting, ship.State);
+        engineMock.Verify(e => e.TurnOn(), Times.Once());
 
-    // Тестирование сценария: Ожидание → Движение → Ожидание
+        // Act: Выполняем разгрузку груза
+        cargoSystemMock.Setup(c => c.CurrentWeight).Returns(100.0);
+        ship.UnloadCargo();
+
+        // Assert: Проверяем, что состояние вернулось в Ожидание после разгрузки
+        Assert.Equal(ShipState.Waiting, ship.State);
+        cargoSystemMock.Verify(c => c.Unload(), Times.Once());
+    }
+
+// Тестирование сценария: Ожидание → Движение → Ожидание
     [Fact]
     public void Scenario_WaitingToMovingToWaiting()
     {
@@ -119,19 +137,101 @@ public class ShipTests
     
     // Ожидание → Погрузка → Ожидание → Движение → Ожидание
     [Fact]
-    public void LoadCargoAndNavigate_ShouldFollowSequence()
+    public void Scenario_Waiting_Loading_Waiting_Moving_Waiting()
     {
+        // Arrange: Запускаем корабль, чтобы перейти в состояние Ожидание
         ship.Start();
         Assert.Equal(ShipState.Waiting, ship.State);
+        engineMock.Verify(e => e.TurnOn(), Times.Once());
 
+        // Act: Выполняем погрузку груза
         cargoSystemMock.Setup(c => c.CurrentWeight).Returns(100.0);
         ship.LoadCargo(100.0);
+
+        // Assert: Проверяем, что состояние вернулось в Ожидание после погрузки
         Assert.Equal(ShipState.Waiting, ship.State);
+        cargoSystemMock.Verify(c => c.Load(100.0), Times.Once());
 
-        ship.NavigateTo("Port B");
+        // Act: Выполняем навигацию
+        ship.NavigateTo("Порт C");
+
+        // Assert: Проверяем, что состояние изменилось на Движение
         Assert.Equal(ShipState.Moving, ship.State);
+        navigationSystemMock.Verify(n => n.SetDestination("Порт C"), Times.Once());
 
+        // Act: Выполняем ожидание
         ship.Wait();
+
+        // Assert: Проверяем, что состояние вернулось в Ожидание
+        Assert.Equal(ShipState.Waiting, ship.State);
+    }
+    
+    // Ожидание → Разгрузка → Ожидание → Движение → Ожидание
+    [Fact]
+    public void Scenario_WaitingToUnloadingToWaitingToMovingToWaiting()
+    {
+        // Arrange: Запускаем корабль, чтобы перейти в состояние Ожидание  
+        ship.Start();  
+        Assert.Equal(ShipState.Waiting, ship.State);  
+        engineMock.Verify(e => e.TurnOn(), Times.Once());  
+
+        // Act: Выполняем разгрузку груза  
+        cargoSystemMock.Setup(c => c.CurrentWeight).Returns(100.0);  
+        ship.UnloadCargo();  
+
+        // Assert: Проверяем, что состояние вернулось в Ожидание после разгрузки  
+        Assert.Equal(ShipState.Waiting, ship.State);  
+        cargoSystemMock.Verify(c => c.Unload(), Times.Once());  
+
+        // Act: Выполняем навигацию  
+        ship.NavigateTo("Порт C");  
+
+        // Assert: Проверяем, что состояние изменилось на Движение  
+        Assert.Equal(ShipState.Moving, ship.State);  
+        navigationSystemMock.Verify(n => n.SetDestination("Порт C"), Times.Once());  
+
+        // Act: Выполняем ожидание  
+        ship.Wait();  
+
+        // Assert: Проверяем, что состояние вернулось в Ожидание  
+        Assert.Equal(ShipState.Waiting, ship.State);  
+    }
+    
+    // Ожидание → Погрузка → Ожидание → Разгрузка → Ожидание → Движение → Ожидание
+    [Fact]
+    public void Scenario_Waiting_Loading_Waiting_Unloading_Waiting_Moving_Waiting()
+    {
+        // Подготовка: Запускаем корабль, чтобы перейти в состояние Ожидание
+        ship.Start();
+        Assert.Equal(ShipState.Waiting, ship.State);
+        engineMock.Verify(e => e.TurnOn(), Times.Once());
+
+        // Действие: Выполняем погрузку груза
+        cargoSystemMock.Setup(c => c.CurrentWeight).Returns(100.0);
+        ship.LoadCargo(100.0);
+
+        // Проверка: Убедимся, что состояние вернулось в Ожидание после погрузки
+        Assert.Equal(ShipState.Waiting, ship.State);
+        cargoSystemMock.Verify(c => c.Load(100.0), Times.Once());
+
+        // Действие: Выполняем разгрузку груза
+        ship.UnloadCargo();
+
+        // Проверка: Убедимся, что состояние вернулось в Ожидание после разгрузки
+        Assert.Equal(ShipState.Waiting, ship.State);
+        cargoSystemMock.Verify(c => c.Unload(), Times.Once());
+
+        // Действие: Выполняем навигацию
+        ship.NavigateTo("Port C");
+
+        // Проверка: Убедимся, что состояние изменилось на Движение
+        Assert.Equal(ShipState.Moving, ship.State);
+        navigationSystemMock.Verify(n => n.SetDestination("Port C"), Times.Once());
+
+        // Действие: Выполняем ожидание
+        ship.Wait();
+
+// Проверка: Убедимся, что состояние вернулось в Ожидание
         Assert.Equal(ShipState.Waiting, ship.State);
     }
 }
