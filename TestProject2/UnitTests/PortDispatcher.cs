@@ -1,6 +1,7 @@
 using ClassLibrary1.Interfaces;
 using ClassLibrary1.Models;
 using WeatherApp.Interfaces;
+using Xunit;
 
 namespace TestProject2.UnitTests;
 
@@ -170,5 +171,101 @@ public class PortDispatcherTests
 
         // Assert
         Assert.Equal("Ship SHIP001: State=Waiting, Cargo=100 tons, Destination=Port C", report);
+    }
+
+    // 1. Запуск судна и остановка (старт и стоп)
+    [Fact]
+    public void Scenario_StartAndStopShip()
+    {
+        portDispatcher.SendCommand(ship, "start");
+        Assert.Equal(ShipState.Waiting, ship.State);
+        Assert.Equal(EngineState.On, engine.State);
+
+        portDispatcher.SendCommand(ship, "stop");
+        Assert.Equal(ShipState.Stopped, ship.State);
+        Assert.Equal(EngineState.Off, engine.State);
+    }
+
+    // 2. Погрузка и разгрузка (используются: CargoSystem + Ship)
+    [Fact]
+    public void Scenario_LoadAndUnloadCargo()
+    {
+        portDispatcher.SendCommand(ship, "start");
+        portDispatcher.SendCommand(ship, "load");
+        Assert.Equal(100.0, cargoSystem.CurrentWeight);
+        Assert.Contains(operationLog.Logs, l => l.Contains("Loaded 100 tons of cargo."));
+
+        portDispatcher.SendCommand(ship, "unload");
+        Assert.Equal(0.0, cargoSystem.CurrentWeight);
+        Assert.Contains(operationLog.Logs, l => l.Contains("Cargo unloaded."));
+    }
+
+    // 3. Погрузка → Навигация (CargoSystem + NavigationSystem + Ship)
+    [Fact]
+    public void Scenario_LoadCargoAndNavigate()
+    {
+        portDispatcher.SendCommand(ship, "start");
+        portDispatcher.SendCommand(ship, "load");
+        Assert.Equal(100.0, cargoSystem.CurrentWeight);
+        Assert.Equal(ShipState.Waiting, ship.State);
+
+        portDispatcher.SendCommand(ship, "navigate");
+        Assert.Equal(ShipState.Moving, ship.State);
+        Assert.Equal("Port B", navigationSystem.CurrentDestination);
+    }
+
+    // 4. Запуск → Навигация → Ожидание (Engine + NavigationSystem + Ship)
+    [Fact]
+    public void Scenario_NavigateAndWait()
+    {
+        portDispatcher.SendCommand(ship, "start");
+        portDispatcher.SendCommand(ship, "navigate");
+        Assert.Equal(ShipState.Moving, ship.State);
+        Assert.Equal(EngineState.On, engine.State);
+
+        // Возвращаемся в ожидание
+        ship.Wait();
+        Assert.Equal(ShipState.Waiting, ship.State);
+        Assert.Equal(EngineState.On, engine.State);
+    }
+
+    // 5. Интеграционный сценарий: затрагивает все объекты
+    [Fact]
+    public void Scenario_FullOperation_AllSubsystems()
+    {
+        // 1. Запуск
+        portDispatcher.SendCommand(ship, "start");
+        Assert.Equal(ShipState.Waiting, ship.State);
+
+        // 2. Погрузка
+        portDispatcher.SendCommand(ship, "load");
+        Assert.Equal(100.0, cargoSystem.CurrentWeight);
+
+        // 3. Навигация
+        portDispatcher.SendCommand(ship, "navigate");
+        Assert.Equal(ShipState.Moving, ship.State);
+
+        // 4. Ожидание (завершить навигацию)
+        ship.Wait();
+        Assert.Equal(ShipState.Waiting, ship.State);
+
+        // 5. Разгрузка
+        portDispatcher.SendCommand(ship, "unload");
+        Assert.Equal(0.0, cargoSystem.CurrentWeight);
+
+        // 6. Останов
+        portDispatcher.SendCommand(ship, "stop");
+        Assert.Equal(ShipState.Stopped, ship.State);
+
+        // Проверка логов и состояния всех объектов
+        Assert.Equal(EngineState.Off, engine.State);    
+        Assert.Equal(CargoState.Empty, cargoSystem.State);
+        navigationSystem.StopNavigation();
+        Assert.Equal("None", navigationSystem.CurrentDestination);
+        Assert.Contains(operationLog.Logs, l => l.Contains("Ship started and moved to Waiting state."));
+        Assert.Contains(operationLog.Logs, l => l.Contains("Loaded 100 tons of cargo."));
+        Assert.Contains(operationLog.Logs, l => l.Contains("Navigating to Port B."));
+        Assert.Contains(operationLog.Logs, l => l.Contains("Cargo unloaded."));
+        Assert.Contains(operationLog.Logs, l => l.Contains("Ship stopped."));
     }
 }
