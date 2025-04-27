@@ -1,6 +1,7 @@
+using ClassLibrary1.Interfaces;
 using WeatherApp.Interfaces;
 
-namespace WeatherApp.Models;
+namespace ClassLibrary1.Models;
 
 public enum ShipState
 {

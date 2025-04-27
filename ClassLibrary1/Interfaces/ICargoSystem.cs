@@ -1,6 +1,6 @@
-using WeatherApp.Models;
+using ClassLibrary1.Models;
 
-namespace WeatherApp.Interfaces;
+namespace ClassLibrary1.Interfaces;
 
 public interface ICargoSystem
 {

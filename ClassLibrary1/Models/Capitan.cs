@@ -1,4 +1,4 @@
-namespace WeatherApp.Models;
+namespace ClassLibrary1.Models;
 
 public enum CaptainState
 {

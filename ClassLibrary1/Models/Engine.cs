@@ -1,6 +1,6 @@
-using WeatherApp.Interfaces;
+using ClassLibrary1.Interfaces;
 
-namespace WeatherApp.Models;
+namespace ClassLibrary1.Models;
 
 public enum EngineState
 {

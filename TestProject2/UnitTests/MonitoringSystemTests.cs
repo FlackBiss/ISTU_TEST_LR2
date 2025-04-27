@@ -1,6 +1,7 @@
+using ClassLibrary1.Interfaces;
+using ClassLibrary1.Models;
 using Moq;
 using WeatherApp.Interfaces;
-using WeatherApp.Models;
 
 namespace TestProject2.UnitTests;
 

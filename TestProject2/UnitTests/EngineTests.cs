@@ -1,6 +1,6 @@
-using WeatherApp.Models;
+using ClassLibrary1.Models;
 
-namespace WeatherApp.Test.UnitTests;
+namespace TestProject2.UnitTests;
 
 public class EngineTests
 {

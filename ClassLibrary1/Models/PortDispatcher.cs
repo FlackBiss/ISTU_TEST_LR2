@@ -1,6 +1,6 @@
 using WeatherApp.Interfaces;
 
-namespace WeatherApp.Models;
+namespace ClassLibrary1.Models;
 
 public class PortDispatcher
 {
